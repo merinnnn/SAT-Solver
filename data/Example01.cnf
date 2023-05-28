@@ -1,9 +1,6 @@
-c IN1002 Introduction to Algorithms!
-c top secret ID string d1d5fe0233
 c 3 variables and 3 clauses
 p cnf 3 3
 c each line is a clause, 0 marks the end
 2 0
 1 -2 0
 -2 -2 0
-c Good luck!
