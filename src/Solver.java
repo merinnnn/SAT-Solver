@@ -1,10 +1,10 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class Solver {
     private int [][] clauseDatabase = null;
@@ -88,7 +88,7 @@ public class Solver {
     }
 
     public int[] SATSolver (int[][] clauseDatabase){
-        int[] assignment = new int[numberOfVariables +1];
+        int[] assignment = new int[numberOfVariables + 1];
 
         if (clauseDatabase.length == 0)
             return assignment;
@@ -231,7 +231,7 @@ public class Solver {
             boolean checkResult = checkClauseDatabase(assignment, clauseDatabase);
 
             if (checkResult == false) {
-                throw new Exception("Solver failed");
+                throw new Exception("Assignment is not correct");
             }
 
             System.out.println("SATISFIABLE");
@@ -275,9 +275,58 @@ public class Solver {
 
         clauseDatabase = new int[numberOfClauses][];
 
-        
+        for (int i=0; i < numberOfClauses; ++i) {
+            String line = reader.readLine();
 
+            if (line == null) {
+                throw new Exception("Unexpected end of file before clauses have been parsed");
+            } else if (line.startsWith("c")) {
+                // Comment; skip
+                --i;
+                continue;
+            } else {
+                // Try to parse as a clause
+                ArrayList<Integer> tmp = new ArrayList<Integer>();
+                String working = line;
+
+                do {
+                    int split = working.indexOf(" ");
+
+                    if (split == -1) {
+                        // No space found so working should just be
+                        // the final "0"
+                        if (!working.equals("0")) {
+                            throw new Exception("Unexpected end of clause string : \"" + working + "\"");
+                        } else {
+                            // Clause is correct and complete
+                            break;
+                        }
+                    } else {
+                        int var = Integer.parseInt(working.substring(0,split));
+
+                        if (var == 0) {
+                            throw new Exception("Unexpected 0 in the middle of a clause");
+                        } else {
+                            tmp.add(var);
+                        }
+
+                        working = working.substring(split + 1);
+                    }
+                } while (true);
+
+                // Add to the clause database
+                clauseDatabase[i] = new int[tmp.size()];
+                for (int j = 0; j < tmp.size(); ++j) {
+                    clauseDatabase[i][j] = tmp.get(j);
+                }
+            }
+        }
+
+        // All clauses loaded successfully!
+        return;
     }
 
-
 }
+
+
+
