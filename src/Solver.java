@@ -137,6 +137,25 @@ public class Solver {
             }
         }
 
+
+        int index = 0;
+        int frequent = 0;
+        for (int i=0; i<assignment.length; i++){
+            if (assignment[i] == 0){
+                int count = 0;
+                for (int[] clause : clauseDatabase){
+                    if (checkClausePartial(assignment, clause) == 0 && containsLiteral(clause, i)){
+                        count++;
+                    }
+                }
+
+                if (count > frequent){
+                    index = i;
+                    frequent = count;
+                }
+            }
+        }
+
         
 
     }
