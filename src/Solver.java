@@ -14,7 +14,7 @@ public class Solver {
         for (int[] clause : clauseDatabase){
             boolean endLoop = true;
 
-            for (int i=0; i< clause.length; i++){
+            for (int i=0; i<clause.length; i++){
                 int literal = Math.abs(clause[i]);
                 if (assignment[literal] == Integer.signum(clause[i])){
                     endLoop = false;
@@ -182,7 +182,7 @@ public class Solver {
         dpllResult = DPLL(assignmentFalse);
         if (dpllResult){
             for (int i=1; i<assignment.length; i++){
-                assignment[i] = assignmentTrue[i];
+                assignment[i] = assignmentFalse[i];
             }
             assignTrue(assignment);
             return true;
@@ -236,6 +236,13 @@ public class Solver {
             }
 
             System.out.println("SATISFIABLE");
+
+            for (int i = 1; i <= numberOfVariables; ++i) {
+                if (assignment[i] == 1 || assignment[i] == -1) {
+                    System.out.println(i * assignment[i]);
+                }
+            }
+
             return 10;
         }
 
