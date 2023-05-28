@@ -72,7 +72,74 @@ public class Solver {
         return false;
     }
 
-    
+    public void assignTrue (int[] assignment){
+        for (int i=1; i<assignment.length; i++){
+            if (assignment[i] == 0){
+                assignment[i] = 1;
+            }
+        }
+    }
+
+    public int[] SATSolver (int[][] clauseDatabase){
+        int[] assignment = new int[numberOfVariables +1];
+
+        if (clauseDatabase.length == 0)
+            return assignment;
+
+        for (int[] clause : clauseDatabase){
+            if (clause.length == 0){
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+
+    public boolean DPLL (int[] assignment){
+
+        if (checkClauseDatabase(assignment, clauseDatabase)){
+            return true;
+        }
+
+        for (int[] clause : clauseDatabase){
+            if (checkClausePartial(assignment, clause) == -1){
+                return false;
+            }
+        }
+
+        boolean assignmentModified = true;
+        while (assignmentModified){
+            int literal;
+            assignmentModified = false;
+
+            for (int[] clause : clauseDatabase){
+                literal = findUnit(assignment, clause);
+                if (literal != 0 && assignment[Math.abs(literal)] == 0){
+                    assignment[Math.abs(literal)] = Integer.signum(literal);
+                    assignmentModified = true;
+                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
+                    return false;
+                }
+            }
+
+            if (assignmentModified){
+                if (checkClauseDatabase(assignment, clauseDatabase)) {
+                    assignTrue(assignment);
+                    return true;
+                }
+
+                for (int[] clause : clauseDatabase){
+                    if (checkClausePartial(assignment, clause) == -1){
+                        return false;
+                    }
+                }
+            }
+        }
+
+        
+
+    }
 
 
 }
