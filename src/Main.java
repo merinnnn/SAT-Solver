@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 public class Main {
 
     public static void main(String[] args) {
-        for (int i=1; i<=15; i++){
+        for (int i=1; i<=5; i++){
             System.out.println("-----------"+i+"-----------");
             long start = System.nanoTime();
             Main.go(i);
@@ -26,7 +26,7 @@ public class Main {
             } else {
                 index = ""+i;
             }
-            String f = "data/220028896-clause-database-"+index+".cnf";
+            String f = "data/Example"+index+".cnf";
 
             int returnValue = 0;
 
