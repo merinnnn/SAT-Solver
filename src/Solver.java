@@ -40,10 +40,10 @@ public class Solver {
     }
 
 
-    public int findUnit(int[] partialAssignment, int[] clause){
+    public int findUnit (int[] partialAssignment, int[] clause){
         int count = 0;
         int unknownLiteral = 0;
-        
+
         for (int i=0; i<clause.length; i++){
             int literal = Math.abs(clause[i]);
             if (partialAssignment[literal] == Integer.signum(clause[i])){
@@ -61,6 +61,18 @@ public class Solver {
         return count == 1 ? unknownLiteral : 0;
     }
 
+
+    public boolean containsLiteral (int[] clause, int literal){
+        for (int i=0; i<clause.length; i++){
+            if (clause[i] == literal || clause[i] == -literal){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    
 
 
 }
