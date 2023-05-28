@@ -147,7 +147,7 @@ public class Solver {
 
         int index = 0;
         int frequent = 0;
-        for (int i=0; i<assignment.length; i++){
+        for (int i=1; i<assignment.length; i++){
             if (assignment[i] == 0){
                 int count = 0;
                 for (int[] clause : clauseDatabase){
@@ -166,24 +166,25 @@ public class Solver {
         int[] assignmentTrue = assignment.clone();
         assignmentTrue[index] = 1;
 
+        int[] assignmentFalse = assignment.clone();
+        assignmentFalse[index] = -1;
+
         boolean dpllResult = DPLL(assignmentTrue);
         if (dpllResult){
             for (int i=1; i<assignment.length; i++){
-                assignTrue(assignment);
                 assignment[i] = assignmentTrue[i];
             }
+            assignTrue(assignment);
             return true;
         }
 
-        int[] assignmentFalse = assignment.clone();
-        assignmentFalse[index] = -1;
 
         dpllResult = DPLL(assignmentFalse);
         if (dpllResult){
             for (int i=1; i<assignment.length; i++){
-                assignTrue(assignment);
                 assignment[i] = assignmentTrue[i];
             }
+            assignTrue(assignment);
             return true;
         }
 
