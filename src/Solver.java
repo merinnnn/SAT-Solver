@@ -237,9 +237,17 @@ public class Solver {
 
             System.out.println("SATISFIABLE");
 
+            if (assignment.length != numberOfVariables + 1) {
+                throw new Exception("Assignment should have one element per variable.");
+            }
+            if (assignment[0] != 0) {
+                throw new Exception("The first element of an assignment must be zero.");
+            }
             for (int i = 1; i <= numberOfVariables; ++i) {
                 if (assignment[i] == 1 || assignment[i] == -1) {
                     System.out.println(i * assignment[i]);
+                } else {
+                    throw new Exception("assignment[" + i + "] should be 1 or -1, is " + assignment[i]);
                 }
             }
 
