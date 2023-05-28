@@ -23,7 +23,21 @@ public class Solver {
         return true;
     }
 
-    
+
+    public int checkClausePartial (int[] partialAssignment, int[] clause) {
+        boolean unknown = false;
+
+        for (int i=0; i<clause.length; i++){
+            int literal = Math.abs(clause[i]);
+            if (partialAssignment[literal] == Integer.signum(clause[i])){
+                return 1;
+            } else if (partialAssignment[literal] == 0) {
+                unknown = true;
+            }
+        }
+
+        return unknown ? 0 : -1;
+    }
 
 
 
