@@ -1,3 +1,10 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.Buffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Solver {
     private int [][] clauseDatabase = null;
@@ -92,7 +99,7 @@ public class Solver {
             }
         }
 
-        return null;
+        return DPLL(assignment) ? assignment : null;
     }
 
 
@@ -162,6 +169,7 @@ public class Solver {
         boolean dpllResult = DPLL(assignmentTrue);
         if (dpllResult){
             for (int i=1; i<assignment.length; i++){
+                assignTrue(assignment);
                 assignment[i] = assignmentTrue[i];
             }
             return true;
@@ -173,12 +181,101 @@ public class Solver {
         dpllResult = DPLL(assignmentFalse);
         if (dpllResult){
             for (int i=1; i<assignment.length; i++){
+                assignTrue(assignment);
                 assignment[i] = assignmentTrue[i];
             }
             return true;
         }
 
         return false;
+
+    }
+
+
+    public static void main(String[] args) {
+        try {
+            Solver mySolver = new Solver();
+
+            System.out.println("Enter the file to check");
+
+            InputStreamReader isr = new InputStreamReader(System.in);
+            BufferedReader br = new BufferedReader(isr);
+            String fileName = br.readLine();
+
+            int returnValue = 0;
+
+            Path file = Paths.get(fileName);
+            BufferedReader reader = Files.newBufferedReader(file);
+            returnValue = mySolver.runSatSolver(reader);
+
+            return;
+
+        } catch (Exception e){
+            System.err.println("Solver failed");
+            e.printStackTrace(System.err);
+            return;
+        }
+    }
+
+
+    public int runSatSolver (BufferedReader reader) throws Exception, IOException {
+
+        loadDimacs(reader);
+
+        int[] assignment = SATSolver(clauseDatabase);
+
+        if (assignment == null) {
+            System.out.println("UNSATISFIABLE");
+            return 20;
+        } else {
+            boolean checkResult = checkClauseDatabase(assignment, clauseDatabase);
+
+            if (checkResult == false) {
+                throw new Exception("Solver failed");
+            }
+
+            System.out.println("SATISFIABLE");
+            return 10;
+        }
+
+    }
+
+
+
+    public void loadDimacs (BufferedReader reader) throws Exception, IOException{
+        int numberOfClauses = 0;
+
+        do {
+            String line = reader.readLine();
+
+            if (line == null){
+                throw new Exception("Found end of file before a header?");
+            } else if (line.startsWith("c")) {
+                continue;
+            } else if (line.startsWith("p cnf")) {
+                String counters = line.substring(6);
+                int split = counters.indexOf(" ");
+                numberOfVariables = Integer.parseInt(counters.substring(0, split));
+                numberOfClauses = Integer.parseInt(counters.substring(split + 1));
+
+                if (numberOfVariables <= 0){
+                    throw new Exception("Variables should be positive");
+                }
+
+                if (numberOfClauses < 0) {
+                    throw new Exception("Negative number of clauses?");
+                }
+
+                break;
+
+            } else {
+                throw new Exception("Unexpected line");
+            }
+        } while (true);
+
+        clauseDatabase = new int[numberOfClauses][];
+
+        
 
     }
 
