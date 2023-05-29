@@ -46,6 +46,27 @@ public class Solver {
         return unknown ? 0 : -1;
     }
 
+    public int checkClausePartial (int[] partialAssignment, int[][] clauseDatabase) {
+        for (int[] clause : clauseDatabase) {
+            boolean unknown = false;
+
+            aa:
+            for (int i = 0; i < clause.length; i++) {
+               int literal = Math.abs(clause[i]);
+               if (partialAssignment[literal] == Integer.signum(clause[i])) {
+                   break aa;
+               } else if (partialAssignment[literal] == 0) {
+                   unknown = true;
+               }
+           }
+
+            if (!unknown){
+                return -1;
+            }
+       }
+        return 0;
+    }
+
 
     public int findUnit (int[] partialAssignment, int[] clause){
         int count = 0;
@@ -93,11 +114,8 @@ public class Solver {
         if (clauseDatabase.length == 0)
             return assignment;
 
-        for (int[] clause : clauseDatabase){
-            if (clause.length == 0){
-                return null;
-            }
-        }
+        if (checkClausePartial(assignment, clauseDatabase) == -1)
+            return null;
 
         return DPLL(assignment) ? assignment : null;
     }
@@ -109,10 +127,8 @@ public class Solver {
             return true;
         }
 
-        for (int[] clause : clauseDatabase){
-            if (checkClausePartial(assignment, clause) == -1){
+        if (checkClausePartial(assignment, clauseDatabase) == -1){
                 return false;
-            }
         }
 
         boolean assignmentModified = true;
@@ -136,11 +152,10 @@ public class Solver {
                     return true;
                 }
 
-                for (int[] clause : clauseDatabase){
-                    if (checkClausePartial(assignment, clause) == -1){
-                        return false;
-                    }
+                if (checkClausePartial(assignment, clauseDatabase) == -1){
+                    return false;
                 }
+
             }
         }
 
@@ -231,7 +246,7 @@ public class Solver {
         } else {
             boolean checkResult = checkClauseDatabase(assignment, clauseDatabase);
 
-            if (checkResult == false) {
+            if (!checkResult) {
                 throw new Exception("Assignment is not correct");
             }
 
