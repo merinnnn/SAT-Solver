@@ -207,6 +207,38 @@ public class Solver {
 
     }
 
+    public boolean  unitPropagation (int[] assignment){
+        boolean assignmentModified = true;
+        while (assignmentModified){
+            int literal;
+            assignmentModified = false;
+
+            for (int[] clause : clauseDatabase){
+                literal = findUnit(assignment, clause);
+                if (literal != 0 && assignment[Math.abs(literal)] == 0){
+                    assignment[Math.abs(literal)] = Integer.signum(literal);
+                    assignmentModified = true;
+                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
+                    return false;
+                }
+            }
+
+            if (assignmentModified){
+                if (checkClauseDatabase(assignment, clauseDatabase)) {
+                    assignTrue(assignment);
+                    return true;
+                }
+
+                if (checkClausePartial(assignment, clauseDatabase) == -1){
+                    return false;
+                }
+
+            }
+        }
+
+        return true;
+    }
+
 
     public static void main(String[] args) {
         try {
