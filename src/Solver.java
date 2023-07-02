@@ -31,7 +31,7 @@ public class Solver {
     }
 
 
-    public int checkClausePartial (int[] partialAssignment, int[] clause) {
+    public int checkUNSAT(int[] partialAssignment, int[] clause) {
         boolean unknown = false;
 
         for (int i=0; i<clause.length; i++){
@@ -46,25 +46,16 @@ public class Solver {
         return unknown ? 0 : -1;
     }
 
-    public int checkClausePartial (int[] partialAssignment, int[][] clauseDatabase) {
-        for (int[] clause : clauseDatabase) {
-            boolean unknown = false;
 
-            aa:
-            for (int i = 0; i < clause.length; i++) {
-               int literal = Math.abs(clause[i]);
-               if (partialAssignment[literal] == Integer.signum(clause[i])) {
-                   break aa;
-               } else if (partialAssignment[literal] == 0) {
-                   unknown = true;
-               }
-           }
 
-            if (!unknown){
-                return -1;
+    public boolean checkUNSAT(int[] partialAssignment, int[][] clauseDatabase) {
+        for (int[] clause : clauseDatabase){
+            if (checkUNSAT(partialAssignment, clause) == -1){
+                return false;
             }
-       }
-        return 0;
+        }
+
+        return true;
     }
 
 
@@ -114,7 +105,7 @@ public class Solver {
         if (clauseDatabase.length == 0)
             return assignment;
 
-        if (checkClausePartial(assignment, clauseDatabase) == -1)
+        if (!checkUNSAT(assignment, clauseDatabase) )
             return null;
 
         return DPLL(assignment) ? assignment : null;
@@ -127,7 +118,7 @@ public class Solver {
             return true;
         }
 
-        if (checkClausePartial(assignment, clauseDatabase) == -1){
+        if (!checkUNSAT(assignment, clauseDatabase)){
                 return false;
         }
 
@@ -152,7 +143,7 @@ public class Solver {
                     return true;
                 }
 
-                if (checkClausePartial(assignment, clauseDatabase) == -1){
+                if (!checkUNSAT(assignment, clauseDatabase)){
                     return false;
                 }
 
@@ -166,7 +157,7 @@ public class Solver {
             if (assignment[i] == 0){
                 int count = 0;
                 for (int[] clause : clauseDatabase){
-                    if (checkClausePartial(assignment, clause) == 0 && containsLiteral(clause, i)){
+                    if (checkUNSAT(assignment, clause) == 0 && containsLiteral(clause, i)){
                         count++;
                     }
                 }
@@ -205,38 +196,6 @@ public class Solver {
 
         return false;
 
-    }
-
-    public boolean  unitPropagation (int[] assignment){
-        boolean assignmentModified = true;
-        while (assignmentModified){
-            int literal;
-            assignmentModified = false;
-
-            for (int[] clause : clauseDatabase){
-                literal = findUnit(assignment, clause);
-                if (literal != 0 && assignment[Math.abs(literal)] == 0){
-                    assignment[Math.abs(literal)] = Integer.signum(literal);
-                    assignmentModified = true;
-                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
-                    return false;
-                }
-            }
-
-            if (assignmentModified){
-                if (checkClauseDatabase(assignment, clauseDatabase)) {
-                    assignTrue(assignment);
-                    return true;
-                }
-
-                if (checkClausePartial(assignment, clauseDatabase) == -1){
-                    return false;
-                }
-
-            }
-        }
-
-        return true;
     }
 
 
