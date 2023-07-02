@@ -9,8 +9,109 @@ import java.util.ArrayList;
 public class Solver {
     private int [][] clauseDatabase = null;
     private int numberOfVariables = 0;
+    
 
-    public boolean checkClauseDatabase (int[] assignment, int[][] clauseDatabase){
+    public int[] SATSolver (int[][] clauseDatabase){
+        int[] assignment = new int[numberOfVariables + 1];
+
+        if (clauseDatabase.length == 0)
+            return assignment;
+
+        if (!checkUNSAT(assignment, clauseDatabase))
+            return null;
+
+        return DPLL(assignment) ? assignment : null;
+    }
+
+
+    public boolean DPLL (int[] assignment){
+
+        if (checkSAT(assignment, clauseDatabase)){
+            return true;
+        }
+
+        if (!checkUNSAT(assignment, clauseDatabase)){
+            return false;
+        }
+
+        boolean assignmentModified = true;
+        while (assignmentModified){
+            int literal;
+            assignmentModified = false;
+
+            for (int[] clause : clauseDatabase){
+                literal = findUnit(assignment, clause);
+                if (literal != 0 && assignment[Math.abs(literal)] == 0){
+                    assignment[Math.abs(literal)] = Integer.signum(literal);
+                    assignmentModified = true;
+                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
+                    return false;
+                }
+            }
+
+            if (assignmentModified){
+                if (checkSAT(assignment, clauseDatabase)) {
+                    completeAssignment(assignment);
+                    return true;
+                }
+
+                if (!checkUNSAT(assignment, clauseDatabase)){
+                    return false;
+                }
+
+            }
+        }
+
+
+        int index = 0;
+        int frequent = 0;
+        for (int i=1; i<assignment.length; i++){
+            if (assignment[i] == 0){
+                int count = 0;
+                for (int[] clause : clauseDatabase){
+                    if (checkClausePartial(assignment, clause) == 0 && containsLiteral(clause, i)){
+                        count++;
+                    }
+                }
+
+                if (count > frequent){
+                    index = i;
+                    frequent = count;
+                }
+            }
+        }
+
+        int[] assignmentTrue = assignment.clone();
+        assignmentTrue[index] = 1;
+
+        int[] assignmentFalse = assignment.clone();
+        assignmentFalse[index] = -1;
+
+        boolean dpllResult = DPLL(assignmentTrue);
+        if (dpllResult){
+            for (int i=1; i<assignment.length; i++){
+                assignment[i] = assignmentTrue[i];
+            }
+            completeAssignment(assignment);
+            return true;
+        }
+
+
+        dpllResult = DPLL(assignmentFalse);
+        if (dpllResult){
+            for (int i=1; i<assignment.length; i++){
+                assignment[i] = assignmentFalse[i];
+            }
+            completeAssignment(assignment);
+            return true;
+        }
+
+        return false;
+
+    }
+
+
+    public boolean checkSAT(int[] assignment, int[][] clauseDatabase){
         for (int[] clause : clauseDatabase){
             boolean endLoop = true;
 
@@ -31,7 +132,7 @@ public class Solver {
     }
 
 
-    public int checkUNSAT(int[] partialAssignment, int[] clause) {
+    public int checkClausePartial(int[] partialAssignment, int[] clause) {
         boolean unknown = false;
 
         for (int i=0; i<clause.length; i++){
@@ -50,7 +151,7 @@ public class Solver {
 
     public boolean checkUNSAT(int[] partialAssignment, int[][] clauseDatabase) {
         for (int[] clause : clauseDatabase){
-            if (checkUNSAT(partialAssignment, clause) == -1){
+            if (checkClausePartial(partialAssignment, clause) == -1){
                 return false;
             }
         }
@@ -91,111 +192,12 @@ public class Solver {
         return false;
     }
 
-    public void assignTrue (int[] assignment){
+    public void completeAssignment(int[] assignment){
         for (int i=1; i<assignment.length; i++){
             if (assignment[i] == 0){
                 assignment[i] = 1;
             }
         }
-    }
-
-    public int[] SATSolver (int[][] clauseDatabase){
-        int[] assignment = new int[numberOfVariables + 1];
-
-        if (clauseDatabase.length == 0)
-            return assignment;
-
-        if (!checkUNSAT(assignment, clauseDatabase) )
-            return null;
-
-        return DPLL(assignment) ? assignment : null;
-    }
-
-
-    public boolean DPLL (int[] assignment){
-
-        if (checkClauseDatabase(assignment, clauseDatabase)){
-            return true;
-        }
-
-        if (!checkUNSAT(assignment, clauseDatabase)){
-                return false;
-        }
-
-        boolean assignmentModified = true;
-        while (assignmentModified){
-            int literal;
-            assignmentModified = false;
-
-            for (int[] clause : clauseDatabase){
-                literal = findUnit(assignment, clause);
-                if (literal != 0 && assignment[Math.abs(literal)] == 0){
-                    assignment[Math.abs(literal)] = Integer.signum(literal);
-                    assignmentModified = true;
-                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
-                    return false;
-                }
-            }
-
-            if (assignmentModified){
-                if (checkClauseDatabase(assignment, clauseDatabase)) {
-                    assignTrue(assignment);
-                    return true;
-                }
-
-                if (!checkUNSAT(assignment, clauseDatabase)){
-                    return false;
-                }
-
-            }
-        }
-
-
-        int index = 0;
-        int frequent = 0;
-        for (int i=1; i<assignment.length; i++){
-            if (assignment[i] == 0){
-                int count = 0;
-                for (int[] clause : clauseDatabase){
-                    if (checkUNSAT(assignment, clause) == 0 && containsLiteral(clause, i)){
-                        count++;
-                    }
-                }
-
-                if (count > frequent){
-                    index = i;
-                    frequent = count;
-                }
-            }
-        }
-
-        int[] assignmentTrue = assignment.clone();
-        assignmentTrue[index] = 1;
-
-        int[] assignmentFalse = assignment.clone();
-        assignmentFalse[index] = -1;
-
-        boolean dpllResult = DPLL(assignmentTrue);
-        if (dpllResult){
-            for (int i=1; i<assignment.length; i++){
-                assignment[i] = assignmentTrue[i];
-            }
-            assignTrue(assignment);
-            return true;
-        }
-
-
-        dpllResult = DPLL(assignmentFalse);
-        if (dpllResult){
-            for (int i=1; i<assignment.length; i++){
-                assignment[i] = assignmentFalse[i];
-            }
-            assignTrue(assignment);
-            return true;
-        }
-
-        return false;
-
     }
 
 
@@ -235,7 +237,7 @@ public class Solver {
             System.out.println("UNSATISFIABLE");
             return 20;
         } else {
-            boolean checkResult = checkClauseDatabase(assignment, clauseDatabase);
+            boolean checkResult = checkSAT(assignment, clauseDatabase);
 
             if (!checkResult) {
                 throw new Exception("Assignment is not correct");
