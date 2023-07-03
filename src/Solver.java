@@ -34,52 +34,12 @@ public class Solver {
             return false;
         }
 
-        boolean assignmentModified = true;
-        while (assignmentModified){
-            int literal;
-            assignmentModified = false;
-
-            for (int[] clause : clauseDatabase){
-                literal = findUnit(assignment, clause);
-                if (literal != 0 && assignment[Math.abs(literal)] == 0){
-                    assignment[Math.abs(literal)] = Integer.signum(literal);
-                    assignmentModified = true;
-                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
-                    return false;
-                }
-            }
-
-            if (assignmentModified){
-                if (checkSAT(assignment, clauseDatabase)) {
-                    completeAssignment(assignment);
-                    return true;
-                }
-
-                if (!checkUNSAT(assignment, clauseDatabase)){
-                    return false;
-                }
-
-            }
+        if (!unitPropagation(assignment)){
+            return false;
         }
 
 
-        int index = 0;
-        int frequent = 0;
-        for (int i=1; i<assignment.length; i++){
-            if (assignment[i] == 0){
-                int count = 0;
-                for (int[] clause : clauseDatabase){
-                    if (checkClausePartial(assignment, clause) == 0 && containsLiteral(clause, i)){
-                        count++;
-                    }
-                }
-
-                if (count > frequent){
-                    index = i;
-                    frequent = count;
-                }
-            }
-        }
+        int index = chooseLiteral(assignment);
 
         int[] assignmentTrue = assignment.clone();
         assignmentTrue[index] = 1;
@@ -108,6 +68,61 @@ public class Solver {
 
         return false;
 
+    }
+
+    public boolean unitPropagation (int[] assignment){
+        boolean assignmentModified = true;
+        while (assignmentModified){
+            int literal;
+            assignmentModified = false;
+
+            for (int[] clause : clauseDatabase){
+                literal = findUnit(assignment, clause);
+                if (literal != 0 && assignment[Math.abs(literal)] == 0){
+                    assignment[Math.abs(literal)] = Integer.signum(literal);
+                    assignmentModified = true;
+                } else if (literal != 0 && assignment[Math.abs(literal)] != 0) {
+                    return false;
+                }
+            }
+
+            if (assignmentModified){
+                if (!checkUNSAT(assignment, clauseDatabase)){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public void pureLiteral (){
+        boolean assignModified = true;
+        while (assignModified){
+
+        }
+    }
+
+    public int chooseLiteral (int[] assignment){
+        int index = 0;
+        int frequent = 0;
+        for (int i=1; i<assignment.length; i++){
+            if (assignment[i] == 0){
+                int count = 0;
+                for (int[] clause : clauseDatabase){
+                    if (checkClausePartial(assignment, clause) == 0 && containsLiteral(clause, i)){
+                        count++;
+                    }
+                }
+
+                if (count > frequent){
+                    index = i;
+                    frequent = count;
+                }
+            }
+        }
+
+        return index;
     }
 
 
