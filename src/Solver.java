@@ -49,9 +49,7 @@ public class Solver {
 
         boolean dpllResult = DPLL(assignmentTrue);
         if (dpllResult){
-            for (int i=1; i<assignment.length; i++){
-                assignment[i] = assignmentTrue[i];
-            }
+            if (assignment.length - 1 >= 0) System.arraycopy(assignmentTrue, 1, assignment, 1, assignment.length - 1);
             completeAssignment(assignment);
             return true;
         }
@@ -59,9 +57,7 @@ public class Solver {
 
         dpllResult = DPLL(assignmentFalse);
         if (dpllResult){
-            for (int i=1; i<assignment.length; i++){
-                assignment[i] = assignmentFalse[i];
-            }
+            if (assignment.length - 1 >= 0) System.arraycopy(assignmentFalse, 1, assignment, 1, assignment.length - 1);
             completeAssignment(assignment);
             return true;
         }
@@ -130,9 +126,9 @@ public class Solver {
         for (int[] clause : clauseDatabase){
             boolean endLoop = true;
 
-            for (int i=0; i<clause.length; i++){
-                int literal = Math.abs(clause[i]);
-                if (assignment[literal] == Integer.signum(clause[i])){
+            for (int j : clause) {
+                int literal = Math.abs(j);
+                if (assignment[literal] == Integer.signum(j)) {
                     endLoop = false;
                     break;
                 }
@@ -150,9 +146,9 @@ public class Solver {
     public int checkClausePartial(int[] partialAssignment, int[] clause) {
         boolean unknown = false;
 
-        for (int i=0; i<clause.length; i++){
-            int literal = Math.abs(clause[i]);
-            if (partialAssignment[literal] == Integer.signum(clause[i])){
+        for (int j : clause) {
+            int literal = Math.abs(j);
+            if (partialAssignment[literal] == Integer.signum(j)) {
                 return 1;
             } else if (partialAssignment[literal] == 0) {
                 unknown = true;
@@ -179,15 +175,15 @@ public class Solver {
         int count = 0;
         int unknownLiteral = 0;
 
-        for (int i=0; i<clause.length; i++){
-            int literal = Math.abs(clause[i]);
-            if (partialAssignment[literal] == Integer.signum(clause[i])){
+        for (int j : clause) {
+            int literal = Math.abs(j);
+            if (partialAssignment[literal] == Integer.signum(j)) {
                 return 0;
             } else if (partialAssignment[literal] == 0) {
-                unknownLiteral = clause[i];
+                unknownLiteral = j;
                 count++;
 
-                if (count > 1){
+                if (count > 1) {
                     return 0;
                 }
             }
@@ -198,8 +194,8 @@ public class Solver {
 
 
     public boolean containsLiteral (int[] clause, int literal){
-        for (int i=0; i<clause.length; i++){
-            if (clause[i] == literal || clause[i] == -literal){
+        for (int j : clause) {
+            if (j == literal || j == -literal) {
                 return true;
             }
         }
